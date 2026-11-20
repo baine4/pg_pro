@@ -18,7 +18,7 @@ export function boot(ch, opts = {}) {
   document.title = ch.title + ' · P&G PRO capstone concept';
   document.documentElement.style.setProperty('--acc', ch.accent || '#3b82ff');
   document.body.innerHTML = `<div class="mob">Desktop only for now.<br>Open this on a laptop or projector.</div><canvas id="gl"></canvas><div id="hud"></div><div id="spacer"></div>`;
-  const hud = $('#hud');
+  const hud = $('#hud'); if (ch.home) hud.classList.add('home'); if (ch.cine) hud.classList.add('cine');
 
   // ---- state from controls (+ saved) ----
   const state = {};
@@ -32,7 +32,7 @@ export function boot(ch, opts = {}) {
   $('#spacer').style.height = (N * 380) + 'vh';
 
   // ---- top bar ----
-  hud.append(el(`<div class="top"><a href="${root}">${ch.home ? 'P&amp;G PRO capstone concepts' : '&larr; All five concepts'}</a><span class="badge">Capstone concept &middot; not a P&amp;G product</span><div class="right"><span id="cnt">01 / ${String(N).padStart(2,'0')}</span><button class="btn" id="bcust">Customize</button></div></div>`));
+  hud.append(el(`<div class="top"><a href="${root}">${ch.home ? 'P&amp;G PRO capstone concepts' : '&larr; All five concepts'}</a><span class="badge">Capstone concept &middot; not a P&amp;G product</span>${ch.home ? '' : `<div class="right"><span id="cnt">01 / ${String(N).padStart(2,'0')}</span><button class="btn" id="bcust">Customize</button></div>`}</div>`));
 
   // ---- scene layers ----
   const layers = scenes.map((s, i) => {
@@ -70,7 +70,7 @@ export function boot(ch, opts = {}) {
   scenes.forEach((s, i) => (s.pins || []).forEach(p => { const n = el(`<div class="pin">${p.t}</div>`); hud.append(n); pinEls.push({ n, i, p }); }));
 
   // ---- need meter ----
-  hud.append(el(`<div class="needs-title">User needs this scene serves &middot; bar = weight from our pairwise ranking</div>`));
+  hud.append(el(`<div class="needs-title">${ch.home ? 'The eight user needs behind every idea' : 'User needs this scene serves &middot; bar = weight from our pairwise ranking'}</div>`));
   const nm = el(`<div class="needs">${NEEDS.map(n => `<div class="need" data-n="${n.id}" title="${n.name} (${n.w}%)"><b>${n.id}</b><span>${n.name}</span><i style="width:${n.w * 4}%"></i></div>`).join('')}</div>`);
   hud.append(nm);
   // rail
@@ -102,8 +102,8 @@ export function boot(ch, opts = {}) {
     store.set(key + ':state', state); syncInputs();
   });
   syncInputs();
-  const toggleDrawer = () => { drawer.classList.toggle('open'); $('#bcust').classList.toggle('on'); };
-  $('#bcust').onclick = toggleDrawer;
+  const toggleDrawer = () => { if (!$('#bcust')) return; drawer.classList.toggle('open'); $('#bcust').classList.toggle('on'); };
+  if ($('#bcust')) $('#bcust').onclick = toggleDrawer;
   $('#breset').onclick = () => { (ch.controls || []).forEach(c => state[c.key] = c.value); store.set(key + ':state', state); syncInputs(); };
   $('#bcopy').onclick = () => { const t = JSON.stringify(state, null, 1); try { navigator.clipboard.writeText(t); $('#bcopy').textContent = 'Copied'; setTimeout(() => $('#bcopy').textContent = 'Copy settings', 1200); } catch { prompt('Copy:', t); } };
   let editing = false;
@@ -119,10 +119,10 @@ export function boot(ch, opts = {}) {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
-  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0a0d12); scene.fog = new THREE.Fog(0x0a0d12, ch.fog?.[0] ?? 30, ch.fog?.[1] ?? 140);
-  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 600);
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(ch.bg ?? 0x0a0d12); scene.fog = new THREE.Fog(ch.bg ?? 0x0a0d12, ch.fog?.[0] ?? 30, ch.fog?.[1] ?? 140);
+  const camera = new THREE.PerspectiveCamera(ch.fov ?? 42, 1, 0.1, 600);
   kit.lights(scene);
-  { const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.35; }
+  { const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = ch.env ?? 0.35; }
   const resize = () => { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); };
   addEventListener('resize', resize); resize();
 
@@ -174,7 +174,7 @@ export function boot(ch, opts = {}) {
       n.style.opacity = tmp.z < 1 ? o : 0; n.style.transform = `translate(${(tmp.x * .5 + .5) * innerWidth}px,${(-tmp.y * .5 + .5) * innerHeight}px) translate(-50%,-130%)`;
     });
     if (idx !== lastIdx) {
-      lastIdx = idx; cnt.textContent = `${String(idx + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}`;
+      lastIdx = idx; if (cnt) cnt.textContent = `${String(idx + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}`;
       const on = scenes[idx].needs || [];
       nm.querySelectorAll('.need').forEach(n => n.classList.toggle('on', on.includes(n.dataset.n)));
       rail.querySelectorAll('i').forEach((d, i) => d.classList.toggle('on', i === idx));

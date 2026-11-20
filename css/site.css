@@ -110,3 +110,18 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 .lc{font-size:13.5px}.logic h2{font-size:clamp(30px,3.6vw,56px)}
 .logic{top:90px;gap:22px}.lgrid{gap:16px}
 #hud::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,13,18,.82) 0%,rgba(10,13,18,.5) 38%,rgba(10,13,18,0) 62%);pointer-events:none}
+.scene{padding-top:76px}
+.home .needs-title{display:block;color:#aeb7c3;font-size:12px;bottom:84px}
+.home #hud::before,.home::before{background:linear-gradient(90deg,rgba(10,13,18,.96) 0%,rgba(10,13,18,.9) 40%,rgba(10,13,18,.35) 62%,rgba(10,13,18,0) 80%)}
+/* ---- cinematic ("live 3D hero") mode ---- */
+.cine::before{background:linear-gradient(0deg,rgba(6,8,12,.78) 0%,rgba(6,8,12,.35) 28%,rgba(6,8,12,0) 55%)!important}
+.cine .needs,.cine .needs-title,.cine .pin,.cine .badge{display:none}
+.cine .scene{left:7vw;right:7vw;top:auto;bottom:11vh;padding-top:0;justify-content:flex-end;gap:14px}
+.cine .scene h1,.cine .scene h2{font-weight:200;font-size:clamp(40px,5.6vw,96px);letter-spacing:-.02em;line-height:1.02}
+.cine .scene .sub{font-weight:300;font-size:clamp(15px,1.3vw,21px);color:#d4d8de;max-width:34em}
+.cine .kick{display:none}
+.cine em{color:#f1c27d}
+.cine .rail{right:28px}
+.cine .scene .btn{align-self:flex-start;margin-top:8px}
+#vig{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 55%,rgba(0,0,0,.55) 100%)}
+.cine .top .right{display:none}
