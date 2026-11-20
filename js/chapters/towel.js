@@ -63,12 +63,12 @@ export default {
     scene.add(kit.gridFloor(200, 60, -6));
     // TERRY LOOPS
     const COLS = 24, ROWS = 14, N = COLS * ROWS;
-    const loops = new THREE.InstancedMesh(new THREE.TorusGeometry(0.3, 0.11, 6, 10), new THREE.MeshStandardMaterial({ color: 0x4b566b, flatShading: true, roughness: .95 }), N);
+    const loops = new THREE.InstancedMesh(new THREE.TorusGeometry(0.3, 0.11, 10, 18), new THREE.MeshStandardMaterial({ color: 0x4b566b, flatShading: false, roughness: .95 }), N);
     const dm = new THREE.Object3D();
     for (let i = 0; i < N; i++) { const x = (i % COLS - COLS / 2) * 0.72 + (Math.floor(i / COLS) % 2) * .2, y = (Math.floor(i / COLS) - ROWS / 2) * 0.72; dm.position.set(x - 8, y, Math.sin(i * 1.7) * .1); dm.rotation.set(Math.sin(i) * .5, Math.cos(i * 2) * .5, i); dm.updateMatrix(); loops.setMatrixAt(i, dm.matrix); }
     scene.add(loops);
     // SOIL PARTICLES, one layer per soil
-    const layers = SOILS.map((s, k) => { const p = kit.particles(600, [17, 10, 0.01], 0.3, s[2], 1); p.position.set(-8, 0, 0.5 + k * 0.12); p.geometry.setDrawRange(0, 0); scene.add(p); return p; });
+    const layers = SOILS.map((s, k) => { const p = kit.particles(600, [17, 10, 0.01], 0.12, s[2], 0.85); p.position.set(-8, 0, 0.5 + k * 0.12); p.geometry.setDrawRange(0, 0); scene.add(p); return p; });
     const seeds = layers.map(p => Array.from({ length: 600 }, () => (Math.random() - .5)));
     // BARS
     const bars = new THREE.Group(); bars.position.set(38, 0, 0); scene.add(bars);

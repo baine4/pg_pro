@@ -90,7 +90,7 @@ export default {
     // HOOD HEATMAP
     const hood = new THREE.Group(); hood.position.set(80, 0, 0); scene.add(hood);
     hood.add(place(box(16, 0.3, 6, PAL.panel), 0, -0.1, 0)); hood.add(place(box(14, 0.8, 3, PAL.steel), 0, 9.8, 0));
-    const cells = new THREE.InstancedMesh(new THREE.BoxGeometry(1.05, 1.05, 0.3), new THREE.MeshStandardMaterial({ flatShading: true, roughness: .6 }), 72);
+    const cells = new THREE.InstancedMesh(new THREE.BoxGeometry(1.05, 1.05, 0.3), new THREE.MeshStandardMaterial({ flatShading: false, roughness: .6 }), 72);
     const dm = new THREE.Object3D();
     for (let i = 0; i < 72; i++) { dm.position.set((i % 12 - 5.5) * 1.2, 2.5 + Math.floor(i / 12) * 1.2, 0); dm.updateMatrix(); cells.setMatrixAt(i, dm.matrix); cells.setColorAt(i, new THREE.Color(0x3ddc97)); }
     hood.add(cells);

@@ -41,7 +41,7 @@ export default {
     // spray bottle
     { const g = new THREE.Group(); g.add(place(cyl(1.1, 1.1, 3.6, PAL.mint, { edge: PAL.white }, 16), 0, 1.8, 0), place(cyl(0.5, 0.5, 0.8, PAL.white, { edge: PAL.white }, 12), 0, 4, 0), place(box(1.8, 0.7, 0.6, PAL.white), 0.7, 4.7, 0)); mk(2, g); }
     // towel (loops)
-    { const g = new THREE.Group(); const im = new THREE.InstancedMesh(new THREE.TorusGeometry(0.22, 0.09, 6, 10), new THREE.MeshStandardMaterial({ color: 0x7e8aa3, flatShading: true }), 96); const d = new THREE.Object3D(); for (let i = 0; i < 96; i++) { d.position.set((i % 12 - 5.5) * .55, 1.5 + (Math.floor(i / 12) - 3.5) * .55, 0); d.rotation.set(Math.sin(i) * .6, Math.cos(i) * .6, i); d.updateMatrix(); im.setMatrixAt(i, d.matrix); } g.add(im); mk(3, g); }
+    { const g = new THREE.Group(); const im = new THREE.InstancedMesh(new THREE.TorusGeometry(0.22, 0.09, 6, 10), new THREE.MeshStandardMaterial({ color: 0x7e8aa3, flatShading: false }), 96); const d = new THREE.Object3D(); for (let i = 0; i < 96; i++) { d.position.set((i % 12 - 5.5) * .55, 1.5 + (Math.floor(i / 12) - 3.5) * .55, 0); d.rotation.set(Math.sin(i) * .6, Math.cos(i) * .6, i); d.updateMatrix(); im.setMatrixAt(i, d.matrix); } g.add(im); mk(3, g); }
     // machine crate
     { const g = new THREE.Group(); g.add(place(box(5, 4.4, 4, PAL.white, { edge: PAL.cyan, edgeOpacity: 1 }), 0, 2.4, 0), place(box(6, 0.4, 5, PAL.steel), 0, 0.2, 0)); mk(4, g); }
     return { update(u, t) { objs.forEach((g, i) => { g.rotation.y = t * 0.4 + i; g.position.y = Math.sin(t + i) * 0.25; }); } };

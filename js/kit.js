@@ -1,5 +1,6 @@
 // Shared 3D helpers. Flat-shaded low-poly solids with blueprint edge lines.
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from '../vendor/addons/RoundedBoxGeometry.js';
 export { THREE };
 
 export const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -10,38 +11,36 @@ export const ease = t => 1 - Math.pow(1 - clamp(t), 3);
 export const mix = (a, b, t) => new THREE.Color(a).lerp(new THREE.Color(b), clamp(t));
 
 export const PAL = {
-  ink: 0x0a0d12, panel: 0x131923, steel: 0x2a3441, line: 0x5b6b80, white: 0xf3f5f7,
-  blue: 0x3b82ff, cyan: 0x5ce1ff, amber: 0xffb020, red: 0xff5a4f, mint: 0x3ddc97, grey: 0x8b95a3,
+  ink: 0x0a0d12, panel: 0x1a212b, steel: 0x56606c, line: 0x7b8794, white: 0xe8eaed,
+  blue: 0x3a6fc4, cyan: 0x6fb6d6, amber: 0xc98a2b, red: 0xb5483f, mint: 0x4fa987, grey: 0x8a929c,
 };
 
 export function solid(geo, color = PAL.panel, opts = {}) {
   const g = new THREE.Group();
   const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
-    color, flatShading: true, roughness: opts.rough ?? 0.7, metalness: opts.metal ?? 0.1,
+    color, roughness: opts.rough ?? 0.5, metalness: opts.metal ?? 0.12,
     transparent: opts.opacity !== undefined, opacity: opts.opacity ?? 1,
     emissive: opts.emissive ?? 0x000000, emissiveIntensity: opts.ei ?? 1,
   }));
-  g.add(m); g.mesh = m;
-  if (opts.edge !== false) {
-    const l = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 25),
-      new THREE.LineBasicMaterial({ color: opts.edge ?? PAL.line, transparent: true, opacity: opts.edgeOpacity ?? 0.55 }));
-    g.add(l); g.line = l;
-  }
-  return g;
+  m.castShadow = opts.opacity === undefined; m.receiveShadow = true;
+  g.add(m); g.mesh = m; return g;
 }
-export const box = (w, h, d, c, o) => solid(new THREE.BoxGeometry(w, h, d), c, o);
-export const cyl = (rt, rb, h, c, o, seg = 24) => solid(new THREE.CylinderGeometry(rt, rb, h, seg), c, o);
+export const box = (w, h, d, c, o) => solid(new RoundedBoxGeometry(w, h, d, 3, Math.min(0.12, w / 3, h / 3, d / 3)), c, o);
+export const cyl = (rt, rb, h, c, o, seg = 40) => solid(new THREE.CylinderGeometry(rt, rb, h, Math.max(seg, 32)), c, o);
 export const place = (o, x = 0, y = 0, z = 0) => { o.position.set(x, y, z); return o; };
 
+export const key = new THREE.DirectionalLight(0xfff1e0, 2.6);
 export function lights(scene) {
-  scene.add(new THREE.HemisphereLight(0xbcd2ff, 0x10141c, 1.1));
-  const d = new THREE.DirectionalLight(0xffffff, 2.2); d.position.set(8, 14, 10); scene.add(d);
-  const r = new THREE.DirectionalLight(0x3b82ff, 1.2); r.position.set(-10, 4, -8); scene.add(r);
+  scene.add(new THREE.HemisphereLight(0xaab8d0, 0x0c0f14, 0.5));
+  key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.bias = -0.0004; key.shadow.normalBias = 0.03;
+  Object.assign(key.shadow.camera, { left: -26, right: 26, top: 26, bottom: -26, near: 1, far: 90 });
+  scene.add(key, key.target);
+  const r = new THREE.DirectionalLight(0x6f9bff, 0.8); r.position.set(-10, 6, -8); scene.add(r);
 }
 
-export function gridFloor(w = 60, d = 60, y = 0, color = 0x1c2430) {
-  const g = new THREE.GridHelper(Math.max(w, d), Math.max(w, d) / 2, color, color);
-  g.position.y = y; g.material.transparent = true; g.material.opacity = 0.9; return g;
+export function gridFloor(w = 60, d = 60, y = 0) {
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(900, 150), new THREE.MeshStandardMaterial({ color: 0x10151c, roughness: 0.55, metalness: 0.25 }));
+  m.rotation.x = -Math.PI / 2; m.position.y = y; m.receiveShadow = true; return m;
 }
 
 export function weaveTexture(base = '#4a586b', dark = '#1a212c', n = 28) {
@@ -69,13 +68,13 @@ export function particles(n, spread, size = 0.12, color = 0xffffff, opacity = 0.
 // Fabric close-up used by several chapters: weave plane, lodged stain, water flow, cleaner flow.
 export function fabric({ w = 14, h = 9, stainColor = PAL.amber } = {}) {
   const g = new THREE.Group();
-  const tex = weaveTexture(); tex.repeat.set(w / 3, h / 3);
-  const plane = new THREE.Mesh(new THREE.PlaneGeometry(w, h, 1, 1),
-    new THREE.MeshStandardMaterial({ map: tex, bumpMap: tex, bumpScale: 2.2, roughness: 0.95, color: 0x8a8a8a }));
+  const tex = weaveTexture(); tex.repeat.set(w, h);
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(w * 3, h * 3, 1, 1),
+    new THREE.MeshStandardMaterial({ map: tex, bumpMap: tex, bumpScale: 1.0, roughness: 0.95, color: 0x5a5a5a }));
   g.add(plane);
   // stain = cluster of tiny spheres half buried in the weave
-  const N = 320, ig = new THREE.IcosahedronGeometry(0.16, 0);
-  const im = new THREE.InstancedMesh(ig, new THREE.MeshStandardMaterial({ color: stainColor, flatShading: true, roughness: .6 }), N);
+  const N = 320, ig = new THREE.IcosahedronGeometry(0.16, 2);
+  const im = new THREE.InstancedMesh(ig, new THREE.MeshStandardMaterial({ color: stainColor, roughness: .35, metalness: .05 }), N);
   const seed = [];
   for (let i = 0; i < N; i++) {
     const r = Math.pow(Math.random(), 0.7) * 1.7, a = Math.random() * 6.283;
@@ -83,8 +82,8 @@ export function fabric({ w = 14, h = 9, stainColor = PAL.amber } = {}) {
   }
   g.add(im);
   const dummy = new THREE.Object3D();
-  const water = particles(700, [w, h, 0.01], 0.09, 0x6aa8ff, 0.75);
-  const chem = particles(420, [w, h, 0.01], 0.14, 0xe9fbff, 0.95);
+  const water = particles(260, [w, h, 0.01], 0.07, 0x7fb0ff, 0.5);
+  const chem = particles(160, [w, h, 0.01], 0.1, 0xe9fbff, 0.7);
   water.position.z = 0.7; chem.position.z = 0.9; chem.visible = false;
   g.add(water, chem);
   const api = {

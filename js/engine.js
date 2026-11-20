@@ -1,6 +1,7 @@
 // Scroll-driven 3D story engine. No build step. Fixed WebGL canvas + fixed HUD text layers.
 import * as kit from './kit.js';
 import { NEEDS, TAGS } from './data.js';
+import { RoomEnvironment } from '../vendor/addons/RoomEnvironment.js';
 const { THREE, clamp, lerp, smooth } = kit;
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -28,7 +29,7 @@ export function boot(ch, opts = {}) {
   const scenes = ch.scenes.slice();
   if (ch.logic) scenes.push({ id: 'logic', logic: true, needs: ch.logic.needs || [], cam: ch.logic.cam || scenes[scenes.length - 1].cam });
   const N = scenes.length;
-  $('#spacer').style.height = (N * 120) + 'vh';
+  $('#spacer').style.height = (N * 380) + 'vh';
 
   // ---- top bar ----
   hud.append(el(`<div class="top"><a href="${root}">${ch.home ? 'P&amp;G PRO capstone concepts' : '&larr; All five concepts'}</a><span class="badge">Capstone concept &middot; not a P&amp;G product</span><div class="right"><span id="cnt">01 / ${String(N).padStart(2,'0')}</span><button class="btn" id="bcust">Customize</button></div></div>`));
@@ -116,9 +117,12 @@ export function boot(ch, opts = {}) {
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' }); }
   catch (e) { document.body.insertAdjacentHTML('beforeend', '<div style="position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:40px;font:700 22px Inter Tight,sans-serif;text-align:center">This page needs WebGL. Open it in Chrome or Edge on a laptop.</div>'); throw e; }
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
   const scene = new THREE.Scene(); scene.background = new THREE.Color(0x0a0d12); scene.fog = new THREE.Fog(0x0a0d12, ch.fog?.[0] ?? 30, ch.fog?.[1] ?? 140);
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 600);
   kit.lights(scene);
+  { const pm = new THREE.PMREMGenerator(renderer); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; scene.environmentIntensity = 0.35; }
   const resize = () => { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); };
   addEventListener('resize', resize); resize();
 
@@ -129,7 +133,7 @@ export function boot(ch, opts = {}) {
   addEventListener('mousemove', e => { mouse.x = e.clientX / innerWidth - .5; mouse.y = e.clientY / innerHeight - .5; });
   const maxScroll = () => Math.max(1, document.documentElement.scrollHeight - innerHeight);
   const readTarget = () => { target = clamp(scrollY / maxScroll()) * (N - 1); };
-  addEventListener('scroll', readTarget); readTarget(); u = target;
+  let snapT; addEventListener('scroll', () => { readTarget(); clearTimeout(snapT); snapT = setTimeout(() => { const i = Math.round(target); if (Math.abs(target - i) > 0.02) goto(i); }, 180); }); readTarget(); u = target;
   const goto = (i) => scrollTo({ top: clamp(i, 0, N - 1) / (N - 1) * maxScroll(), behavior: 'smooth' });
   rail.onclick = e => { if (e.target.dataset.i !== undefined) goto(+e.target.dataset.i); };
   addEventListener('keydown', e => {
@@ -147,20 +151,21 @@ export function boot(ch, opts = {}) {
   const cnt = $('#cnt');
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now; const t = now / 1000;
-    u += (target - u) * (1 - Math.exp(-dt * 6));
+    u += (target - u) * (1 - Math.exp(-dt * 2.6));
     const i0 = Math.min(N - 2, Math.floor(u)), f = u - i0;
-    const k = smooth(clamp((f - 0.22) / 0.56));                       // dwell near each scene, travel in the middle
+    const k = smooth(clamp((f - 0.3) / 0.4));                       // dwell near each scene, travel in the middle
     const A = scenes[i0].cam, B = scenes[i0 + 1].cam;
     camP.set(...A.p).lerp(a.set(...B.p), k); camL.set(...A.l).lerp(b.set(...B.l), k);
     mouse.sx += (mouse.x - mouse.sx) * 0.05; mouse.sy += (mouse.y - mouse.sy) * 0.05;
     camera.position.copy(camP); camera.lookAt(camL);
     camera.translateX(mouse.sx * 1.4); camera.translateY(-mouse.sy * 0.9); camera.lookAt(camL);
+    kit.key.target.position.copy(camL); kit.key.position.copy(camL).add(a.set(9, 18, 12));
     world.update && world.update(u, t, state, dt);
     renderer.render(scene, camera);
     // text layers
     const idx = Math.round(u);
     layers.forEach((n, i) => {
-      const o = clamp(1 - Math.abs(u - i) * 2.2);
+      const o = clamp(1 - Math.abs(u - i) * 1.7);
       n.style.opacity = o; n.style.visibility = o > 0.01 ? 'visible' : 'hidden';
       n.style.transform = `translateY(${(i - u) * 26}px)`; n.style.pointerEvents = o > 0.6 ? 'auto' : 'none';
     });

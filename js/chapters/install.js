@@ -82,7 +82,7 @@ export default {
     // CHAIN
     const ch = new THREE.Group(); ch.position.set(40, 0, 0); scene.add(ch);
     ch.add(place(box(24, 0.3, 8, PAL.panel), 0, -0.1, 0));
-    const links = Array.from({ length: 6 }, (_, i) => { const l = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.28, 8, 20), new THREE.MeshStandardMaterial({ color: PAL.line, flatShading: true, metalness: .4 })); l.position.set(-9 + i * 3.2, 3, 0); l.rotation.y = i % 2 ? Math.PI / 2 : 0; ch.add(l); return l; });
+    const links = Array.from({ length: 6 }, (_, i) => { const l = new THREE.Mesh(new THREE.TorusGeometry(1.1, 0.28, 8, 20), new THREE.MeshStandardMaterial({ color: PAL.line, flatShading: false, metalness: .4 })); l.position.set(-9 + i * 3.2, 3, 0); l.rotation.y = i % 2 ? Math.PI / 2 : 0; ch.add(l); return l; });
     ch.add(place(box(1, 5, 1, PAL.steel), -12, 2.5, 0)); ch.add(place(box(1, 5, 1, PAL.steel), 12, 2.5, 0));
     // KIT
     const kitG = new THREE.Group(); kitG.position.set(80, 0, 0); scene.add(kitG);
@@ -96,7 +96,7 @@ export default {
     const marks = Array.from({ length: 26 }, (_, i) => { const m = cyl(0.35, 0.35, 1, PAL.cyan, { edge: false }, 10); m.position.x = -12 + i * 1; m.position.y = .5; vis.add(m); return m; });
     // MAP
     const map = new THREE.Group(); map.position.set(156, 0, 0); scene.add(map);
-    const dots = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.35, 0.35, 0.5, 8), new THREE.MeshStandardMaterial({ flatShading: true }), 350);
+    const dots = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.35, 0.35, 0.5, 8), new THREE.MeshStandardMaterial({ flatShading: false }), 350);
     const pos = Array.from({ length: 350 }, (_, i) => { const a = i * 2.399963, r = Math.sqrt(i + 1) * 1.15; return [Math.cos(a) * r * 1.35, Math.sin(a) * r * .8]; });
     const d = new THREE.Object3D();
     // BUY VS LEASE

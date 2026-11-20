@@ -80,7 +80,7 @@ export default {
     room.add(place(box(5.6, 0.7, 4.6, PAL.white), 0, 1.5, 0));
     room.add(place(box(2, 0.5, 1.2, PAL.white), -1.3, 1.6, -3.7), place(box(2, 0.5, 1.2, PAL.white), 1.3, 1.6, -3.7));
     room.add(place(box(1.6, 1.8, 1.6, PAL.steel), -5, 0.9, -3.8)); room.add(place(box(1.6, 1.8, 1.6, PAL.steel), 5, 0.9, -3.8));
-    const stain = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.06, 28), new THREE.MeshStandardMaterial({ color: PAL.amber, flatShading: true }));
+    const stain = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.06, 28), new THREE.MeshStandardMaterial({ color: PAL.amber, flatShading: false }));
     stain.position.set(0.7, 1.88, 0.6); stain.scale.set(1.3, 1, 0.9); room.add(stain);
     const cart = new THREE.Group(); cart.position.set(13, 0, 0); scene.add(cart);
     cart.add(place(box(3.4, 0.2, 1.8, PAL.steel), 0, 1.2, 0)); [-1.5, 1.5].forEach(x => [-0.7, 0.7].forEach(z => cart.add(place(cyl(0.15, 0.15, 1.2, PAL.line, { edge: false }, 8), x, 0.6, z))));
@@ -88,7 +88,7 @@ export default {
     // CHUTE + CLOCK
     const chute = cyl(1.1, 1.1, 12, PAL.steel, { opacity: .35, edge: PAL.line }); chute.position.set(24, 6, 0); scene.add(chute);
     const wsh = box(3.4, 3.4, 3.4, PAL.steel); wsh.position.set(24, 1.7, 0); scene.add(wsh);
-    const ball = new THREE.Mesh(new THREE.SphereGeometry(0.5, 14, 10), new THREE.MeshStandardMaterial({ color: PAL.amber, flatShading: true })); scene.add(ball);
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(0.5, 14, 10), new THREE.MeshStandardMaterial({ color: PAL.amber, flatShading: false })); scene.add(ball);
     const clock = new THREE.Group(); clock.position.set(30, 6, 0); scene.add(clock);
     const face = cyl(3, 3, 0.4, PAL.panel, { edge: PAL.amber }, 40); face.rotation.x = Math.PI / 2; clock.add(face);
     const hand = box(0.22, 2.5, 0.2, PAL.amber, { edge: false }); hand.position.z = 0.35; const hp = new THREE.Group(); hp.add(hand); hand.position.y = 1.25; hp.position.z = 0.3; clock.add(hp);

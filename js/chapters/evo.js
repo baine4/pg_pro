@@ -82,7 +82,7 @@ export default {
     const mat = (c) => PAL[c] ?? c;
     const washer = (g, x, z) => {
       g.add(place(box(3, 3.4, 3, PAL.steel), x, 1.7, z));
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.12, 8, 24), new THREE.MeshStandardMaterial({ color: PAL.line, flatShading: true }));
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.12, 8, 24), new THREE.MeshStandardMaterial({ color: PAL.line, flatShading: false }));
       ring.position.set(x, 1.8, z + 1.52); g.add(ring);
       g.add(place(cyl(0.9, 0.9, 0.1, PAL.ink, { edge: PAL.blue }, 20), x, 1.8, z + 1.5)).children.at(-1).rotation.x = Math.PI / 2;
     };
